@@ -44,4 +44,4 @@ module AttemptTest =
                         printfn "n2 was also small!"
                         let sum = n1 + n2
                         return sum }
-        runAttempt(sumIfBothSmall (999, 999))
+        runAttempt(sumIfBothSmall (999, 999)) |> printfn "%A"

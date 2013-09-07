@@ -93,4 +93,4 @@ module DistributionTest =
 
     let test() =
         let model = crash (cautiousDriver, aggressiveDriver, trafficLightD)
-        model.Expectation (function Crash -> 1.0 | NoCrash -> 0.0)
+        model.Expectation (function Crash -> 1.0 | NoCrash -> 0.0) |> printfn "%A"

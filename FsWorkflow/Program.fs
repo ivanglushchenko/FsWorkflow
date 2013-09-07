@@ -2,8 +2,7 @@
 
 [<EntryPoint>]
 let main argv = 
-    //let ret AttemptTest.test()
-    let ret = DistributionTest.test()
+    //AttemptTest.test()
+    EventuallyTest.test()
 
-    printfn "%A" ret
     0 // return an integer exit code
