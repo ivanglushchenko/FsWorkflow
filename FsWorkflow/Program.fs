@@ -2,7 +2,5 @@
 
 [<EntryPoint>]
 let main argv = 
-    //AttemptTest.test()
-    EventuallyTest.test()
-
+    ComputationTest.test()
     0 // return an integer exit code

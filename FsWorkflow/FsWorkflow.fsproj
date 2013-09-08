@@ -48,6 +48,7 @@
     <Compile Include="Attempt.fs" />
     <Compile Include="Distribution.fs" />
     <Compile Include="Eventually.fs" />
+    <Compile Include="Computation.fs" />
     <Compile Include="Program.fs" />
     <None Include="App.config" />
   </ItemGroup>
