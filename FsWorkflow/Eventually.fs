@@ -88,10 +88,11 @@ module Eventually =
         member x.Combine(expr1, expr2) = combine expr1 expr2
         member x.Delay(func) = delay func
         member x.Zero() = result ()
-        member x.TryWith(expr, handler) = tryWith expr handler
-        member x.TryFinally(expr, compensation) = tryFinally expr compensation
-        member x.For(coll:seq<_>, func) = forLoop coll func
-        member x.Using(resource, expr) = using resource expr
+        //member x.TryWith(expr, handler) = tryWith expr handler
+        //member x.TryFinally(expr, compensation) = tryFinally expr compensation
+        //member x.For(coll:seq<_>, func) = forLoop coll func
+        //member x.Using(resource, expr) = using resource expr
+        member x.While(pred, body) = whileLoop pred body
 
     let eventually = new EventuallyBuilder()
 
@@ -99,8 +100,11 @@ module EventuallyTest =
     open Eventually
 
     let comp =
-        eventually { for x in 1 .. 2 do
-                        printfn " x = %d" x
+        eventually { //for x in 1 .. 2 do
+                     //   printfn " x = %d" x
+                     let b = true
+                     while b do
+                        printfn "b is true"
                      return 3 + 4 }
 
     // Try the remaining lines in F# interactive to see how this 
