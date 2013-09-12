@@ -8,24 +8,24 @@ module Computation2 =
 
     type Computation<'v> = (unit -> Result<'v>)
 
-    let inline value v = fun () -> Value v
+    let inline value v = Value v
 
-    let inline nothing() = fun () -> Nothing
+    let inline nothing() = Nothing
 
-    let inline error exc = fun () -> Error exc
+    let inline error exc = Error exc
 
     // M<'T> -> 'T
     let inline run cmp = cmp()
     
     // M<'T> * ('T -> M<'U>) -> M<'U>
-    let bind cmp rest = 
+    let bind (cmp : Computation<'t>) (rest : 't -> Computation<'u>) : Computation<'u> = 
         match run cmp with 
         | Value v -> rest v
-        | Nothing -> nothing()
-        | Error e -> error e
+        | Nothing -> fun () -> nothing()
+        | Error e -> fun () -> error e
 
     // (unit -> M<'T>) -> M<'T>
-    let delay f = fun () -> try f() |> run with | exc -> Error exc
+    let delay (f : unit -> Computation<'t>) : Computation<'t> = fun () -> try f() |> run with | exc -> Error exc
 
     // M<'T> * M<'T> -> M<'T>
     let combine cmp1 cmp2 = fun () ->
@@ -34,12 +34,10 @@ module Computation2 =
         | res -> res
 
     // (unit -> bool) * M<'T> -> M<'T>
-    let rec whileLoop pred (body : Computation<'v>) : Computation<unit> =
+    let rec whileLoop (pred: unit -> bool) (body : Computation<'v>) : Computation<unit> =
         if pred() 
-        then bind body (fun _ ->
-            let t = whileLoop pred body
-            t) 
-        else nothing()
+        then bind body (fun _ -> whileLoop pred body) 
+        else fun () -> nothing()
 
     // unit -> M<'T>
     let zero() = nothing
@@ -51,7 +49,7 @@ module Computation2 =
         // Wraps a computation expression as a function.
         member x.Delay(cmp) = delay cmp
         //Called for return in computation expressions.
-        member x.Return(v) = value v
+        member x.Return(v : Result<'t>) = fun () -> v
         // Called for return! in computation expressions.
         member x.ReturnFrom(v) = v
         // Called for sequencing in computation expressions.
@@ -67,13 +65,13 @@ module Computation2Test =
     open Computation2
 
     let test() =
-        let c1 = cmp { return 3 }
-        let format = cmp { return "{0}" }
+        let c1 = cmp { return value 3 }
+        let format = cmp { return value "{0}" }
         let str = cmp { printfn "starting computation..."
                         let! arg0 = c1
                         let! arg1 = format
                         let s = System.String.Format(arg1, arg0)
-                        let s2 = s + "_ADD"
+                        let s2 = s + "_ADD" |> value
                         let b = false 
                         //while b do
                         //    printfn "b is true"
@@ -84,13 +82,13 @@ module Computation2Test =
         printfn "%A" res
 
         let c1 = cmp { failwith "some error"
-                       return 3 }
-        let format = cmp { return "{0}" }
+                       return value 3 }
+        let format = cmp { return value "{0}" }
         let str = cmp { printfn "starting computation..."
                         let! arg0 = c1
                         let! arg1 = format
                         let s = System.String.Format(arg1, arg0)
-                        let s2 = s + "_ADD" 
+                        let s2 = s + "_ADD" |> value
                         return s2 }
 
         printfn "%A" str
